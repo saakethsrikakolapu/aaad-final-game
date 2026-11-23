@@ -1,0 +1,4 @@
+# Keep group names, the answer key and dev files off the live site
+CANVAS_POST.md
+README.md
+tools/
