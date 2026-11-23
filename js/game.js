@@ -232,12 +232,13 @@
     $("#hintBtn").addEventListener("click", () => {
       if (state.r1.hintsUsed < R1.hints.length) { state.r1.hintsUsed++; save(); renderHints(); }
     });
-    $("#resetBtn").addEventListener("click", () => {
-      if (!confirm("Erase all progress and start over?")) return;
+    document.querySelectorAll(".js-restart").forEach((b) => b.addEventListener("click", () => {
+      if (!confirm("Restart the game? This erases all progress and resets the timer.")) return;
       state = fresh();
       save();
+      setFeedback("", "");
       show("title");
-    });
+    }));
     setInterval(updateStats, 1000);
     show("title");
   }

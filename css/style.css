@@ -116,6 +116,16 @@ button:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; }
 .pip.got { background: #0f0c0a; border-color: var(--gold); }
 .pip.got::after { content: ""; position: absolute; width: 3px; height: 3px; border-radius: 50%;
   background: var(--gold); top: 3px; left: 4px; }
+.topbar-restart {
+  background: none; border: 1.5px solid #7d6a55; border-radius: 2px; color: var(--paper); cursor: pointer;
+  font: 800 .85rem var(--display); text-transform: uppercase; letter-spacing: .08em; padding: 4px 9px 3px;
+}
+.topbar-restart:hover { border-color: var(--mustard); color: var(--mustard); }
+.map-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 34px; padding-top: 18px; border-top: 2px dashed rgba(29,22,18,.3);
+}
+.map-foot p { margin: 0; font-style: italic; color: var(--ink-soft); }
 .timer { font: 800 1.15rem var(--display); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 .timer-label { color: var(--mustard); font-size: .85rem; margin-right: 2px; }
 

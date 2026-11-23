@@ -18,6 +18,7 @@
     <div class="topbar-stats">
       <span class="pips" id="pips" title="Stone fragments recovered" aria-label="Stone fragments recovered"></span>
       <span class="timer"><span class="timer-label">Time</span> <span id="timer">00:00</span></span>
+      <button class="topbar-restart js-restart" title="Erase progress and start over">Restart</button>
     </div>
   </header>
 
@@ -35,7 +36,7 @@
           <button class="btn btn-paper" id="startBtn">Begin</button>
           <button class="btn btn-line-light" data-go="howto">How to Play</button>
         </div>
-        <button class="hero-reset" id="resetBtn" hidden>Start over and erase progress</button>
+        <button class="hero-reset js-restart" id="resetBtn" hidden>Start over and erase progress</button>
       </div>
       <div class="band band-waves" aria-hidden="true"></div>
     </section>
@@ -79,6 +80,10 @@
           <span class="key key-water">Esi's line</span>
         </div>
         <ol class="timeline" id="map"></ol>
+        <div class="map-foot">
+          <p>Passing the game to the next group?</p>
+          <button class="btn btn-line js-restart">Start over</button>
+        </div>
       </div>
     </section>
 
