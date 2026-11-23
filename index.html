@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two Sisters, One Stone</title>
+  <meta name="description" content="A story-driven escape room based on Yaa Gyasi's Homegoing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Top bar: visible once the game has started -->
+  <header class="topbar" id="topbar" hidden>
+    <button class="link-btn" data-go="map">◂ Map</button>
+    <div class="topbar-stats">
+      <span class="stat" title="Stone fragments recovered"><span class="stat-gem"></span><span><span id="fragCount">0</span>/4</span></span>
+      <span class="stat" title="Time elapsed">⏱ <span id="timer">00:00</span></span>
+    </div>
+  </header>
+
+  <main>
+    <!-- TITLE -->
+    <section class="screen" id="screen-title">
+      <div class="title-wrap">
+        <div id="titleStone" class="title-stone" aria-hidden="true"></div>
+        <p class="eyebrow">An escape room based on <em>Homegoing</em> by Yaa Gyasi</p>
+        <h1>Two Sisters, One Stone</h1>
+        <p class="slogan">Follow the bloodline. Find your way home.</p>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="startBtn">Begin</button>
+          <button class="btn btn-ghost" data-go="howto">How to Play</button>
+        </div>
+        <button class="link-btn small" id="resetBtn" hidden>Start over (erase progress)</button>
+      </div>
+    </section>
+
+    <!-- HOW TO PLAY -->
+    <section class="screen" id="screen-howto" hidden>
+      <div class="panel narrow">
+        <h2>How to Play</h2>
+        <p>Two half-sisters, Effia and Esi, are born to the same mother, Maame, in 18th-century Ghana. Their families are split apart for seven generations. Your group must follow both bloodlines through four rooms and recover the four pieces of Maame's black stone.</p>
+        <ol class="steps">
+          <li><strong>Gather around one screen.</strong> 3–6 players. Talk everything through together.</li>
+          <li><strong>Read the story intro</strong> at the start of each room out loud.</li>
+          <li><strong>Solve the puzzle.</strong> Every answer comes from <em>Homegoing</em> and what we studied in class.</li>
+          <li><strong>Check your answer.</strong> Correct answers unlock a stone fragment and the next room.</li>
+          <li><strong>Stuck?</strong> Each room has 3 hints. Each one is more specific than the last.</li>
+          <li><strong>Escape</strong> by recovering all four fragments. The timer tracks how long your group takes.</li>
+        </ol>
+        <p class="tip">Suggested roles: <strong>Reader</strong> (reads intros aloud), <strong>Driver</strong> (controls the screen), <strong>Historian</strong> (connects puzzles to class), <strong>Skeptic</strong> (double-checks before submitting).</p>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="startBtn2">Begin</button>
+          <button class="btn btn-ghost" data-go="title">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="screen" id="screen-map" hidden>
+      <div class="panel">
+        <h2>The Bloodline</h2>
+        <p class="muted">Each room moves forward in time. Solve them in order.</p>
+        <div class="map" id="map"></div>
+      </div>
+    </section>
+
+    <!-- ROOM 1 -->
+    <section class="screen" id="screen-room1" hidden>
+      <div class="panel">
+        <p class="eyebrow">Room 1 · Cape Coast Castle · 1760s</p>
+        <h2>The Castle</h2>
+        <div class="story">
+          <p>Maame has two daughters who will never meet. <strong>Effia</strong> grows up in Fanteland. <strong>Esi</strong> grows up in Asanteland.</p>
+          <p>Years later, both sisters end up inside the same building: Cape Coast Castle. One lives <strong>upstairs</strong>, in the governor's quarters. The other is held in the <strong>dungeon</strong> beneath her feet.</p>
+          <p>The memories below have been scattered. <strong>Sort each one</strong> to the sister it belongs to. When all eight are in place, check your answer.</p>
+        </div>
+
+        <div class="pool-head">
+          <h3>Scattered memories</h3>
+          <span class="muted" id="poolCount"></span>
+        </div>
+        <div class="pool" id="pool"></div>
+
+        <div class="zones">
+          <div class="zone zone-up">
+            <div class="zone-head">
+              <span class="zone-icon">▲</span>
+              <div><h3>Upstairs</h3><p>Effia · wife of the governor</p></div>
+            </div>
+            <div class="zone-cards" id="zone-U"></div>
+          </div>
+          <div class="zone zone-down">
+            <div class="zone-head">
+              <span class="zone-icon">▼</span>
+              <div><h3>The Dungeon</h3><p>Esi · held captive below</p></div>
+            </div>
+            <div class="zone-cards" id="zone-D"></div>
+          </div>
+        </div>
+
+        <div class="check-row">
+          <button class="btn btn-gold" id="checkBtn" disabled>Check answer</button>
+          <button class="btn btn-ghost" id="hintBtn">Hint (3 left)</button>
+        </div>
+        <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+        <div class="hints" id="hints"></div>
+      </div>
+    </section>
+
+    <!-- ROOM 1 SOLVED -->
+    <section class="screen" id="screen-room1-done" hidden>
+      <div class="panel narrow center">
+        <div id="doneStone" class="done-stone" aria-hidden="true"></div>
+        <p class="eyebrow">Stone fragment 1 of 4 recovered</p>
+        <h2>The Castle: Solved</h2>
+        <div class="story left">
+          <p>Effia walks the halls above the ocean, wearing the stone the woman who raised her pressed into her hand. Below her, Esi waits in the dark, and when the soldiers march her to the ship, her mother's stone stays behind in the dirt.</p>
+          <p>Same mother. Same castle. Two completely different futures.</p>
+        </div>
+        <div class="learn">
+          <h3>Why this matters</h3>
+          <p>Cape Coast Castle is a real place in present-day Ghana. British officials lived and worked on its upper floors while captive Africans were held in the dungeons below. From there they were forced onto ships through what is now called the <strong>Door of No Return</strong>.</p>
+          <p>Gyasi opens the novel by splitting two sisters across those two floors. The slave trade did not only take people from Africa. It divided families, and it ran on deals between European traders and African leaders, including the Fante village Effia grows up in.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" data-go="map">Continue to the map</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/rooms.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+/* Two Sisters, One Stone
+   Palette: night background, parchment cards, gold for the stone,
+   ember for Effia's line (fire) and deep water for Esi's line (water). */
+:root {
+  --bg: #14110e;
+  --bg-2: #1d1914;
+  --panel: #221d17;
+  --line: #3a3128;
+  --text: #efe6d4;
+  --muted: #a89a85;
+  --parchment: #f2e8d3;
+  --ink: #2a2118;
+  --gold: #d4a94a;
+  --gold-2: #b88a2c;
+  --ember: #c2643a;
+  --ember-bg: #2e1c13;
+  --water: #4a86ad;
+  --water-bg: #12212c;
+  --good: #7fb48a;
+  --bad: #e08a6f;
+  --radius: 14px;
+  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #2a2016 0%, transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+[hidden] { display: none !important; }
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0 0 .4em; }
+h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); letter-spacing: .01em; }
+h2 { font-size: clamp(1.9rem, 5vw, 2.6rem); }
+h3 { font-size: 1.35rem; }
+p { margin: 0 0 .9em; }
+em { font-style: italic; }
+
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px;
+  background: rgba(20, 17, 14, .92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-stats { display: flex; gap: 18px; font-variant-numeric: tabular-nums; }
+.stat { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .95rem; }
+.stat-gem {
+  width: 12px; height: 12px; border-radius: 40% 55% 45% 60%;
+  background: radial-gradient(circle at 35% 35%, #4a4038, #0d0b09);
+  box-shadow: 0 0 0 1px var(--gold-2);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  font: 600 1rem var(--sans);
+  padding: 12px 22px; border-radius: 999px; border: 1px solid transparent;
+  cursor: pointer; transition: transform .08s ease, background .2s, opacity .2s;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-gold { background: var(--gold); color: #1a140c; }
+.btn-gold:hover:not(:disabled) { background: #e2b955; }
+.btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--muted); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.center .btn-row { justify-content: center; }
+.link-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font: 500 .95rem var(--sans); padding: 6px 0;
+}
+.link-btn:hover { color: var(--text); }
+.link-btn.small { font-size: .85rem; margin-top: 22px; text-decoration: underline; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* ---------- panels ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(20px, 4vw, 36px);
+}
+.panel.narrow { max-width: 720px; margin: 0 auto; }
+.center { text-align: center; }
+.left { text-align: left; }
+.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; color: var(--gold); margin-bottom: .6em; }
+.muted { color: var(--muted); }
+.tip {
+  background: var(--bg-2); border-left: 3px solid var(--gold);
+  padding: 12px 16px; border-radius: 6px; font-size: .95rem;
+}
+
+/* ---------- title ---------- */
+#screen-title { min-height: 80vh; display: grid; place-items: center; text-align: center; }
+.title-wrap { max-width: 640px; }
+.title-stone { width: 120px; height: 120px; margin: 0 auto 22px; }
+.slogan { font-family: var(--serif); font-size: 1.5rem; font-style: italic; color: var(--muted); margin-bottom: 1.6em; }
+.title-wrap .btn-row { justify-content: center; }
+
+/* ---------- how to play ---------- */
+.steps { padding-left: 1.2em; margin: 0 0 1.2em; }
+.steps li { margin-bottom: .55em; }
+
+/* ---------- map ---------- */
+.map { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-top: 18px; }
+.room-card {
+  text-align: left; color: var(--text);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 18px; font: inherit; display: flex; flex-direction: column; gap: 6px;
+  min-height: 150px;
+}
+.room-card .num { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.room-card .name { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; line-height: 1.1; }
+.room-card .era { color: var(--muted); font-size: .9rem; }
+.room-card .status { margin-top: auto; font-size: .88rem; font-weight: 600; }
+.room-card.open { cursor: pointer; border-color: var(--gold-2); }
+.room-card.open:hover { background: #2a231b; }
+.room-card.open .status { color: var(--gold); }
+.room-card.solved .status { color: var(--good); }
+.room-card.locked { opacity: .5; cursor: not-allowed; }
+.room-card.locked .status { color: var(--muted); }
+
+/* ---------- room 1 ---------- */
+.story {
+  font-size: 1.05rem; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 16px 20px; margin: 10px 0 26px;
+}
+.story p:last-child { margin-bottom: 0; }
+
+.pool-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.pool {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+  margin-bottom: 22px; min-height: 12px;
+}
+.pool:empty::after {
+  content: "All memories sorted. Check your answer below.";
+  color: var(--muted); font-style: italic; grid-column: 1 / -1;
+}
+
+.card {
+  background: var(--parchment); color: var(--ink);
+  border-radius: 10px; padding: 14px 14px 10px;
+  box-shadow: 0 2px 0 rgba(0,0,0,.35);
+  display: flex; flex-direction: column; gap: 10px;
+  font-size: .97rem; line-height: 1.45;
+  animation: drop .18s ease-out;
+}
+@keyframes drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.card-actions { display: flex; gap: 8px; }
+.card-actions button {
+  flex: 1; font: 600 .82rem var(--sans); padding: 7px 8px; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent;
+}
+.to-up { background: #f4d9c9; color: #7a3416; border-color: #e3b79f; }
+.to-up:hover { background: #efc8b2; }
+.to-down { background: #d3e3ee; color: #1d4560; border-color: #a9c6da; }
+.to-down:hover { background: #bfd6e6; }
+.card .return {
+  align-self: flex-start; background: none; border: none; padding: 0;
+  font: 500 .8rem var(--sans); color: #7d6c55; cursor: pointer; text-decoration: underline;
+}
+.card.right { box-shadow: 0 0 0 2px var(--good); }
+.card.wrong { box-shadow: 0 0 0 2px var(--bad); }
+
+.zones { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.zone { border-radius: 12px; padding: 14px; min-height: 180px; border: 1px solid; }
+.zone-up { background: var(--ember-bg); border-color: #5a3422; }
+.zone-down { background: var(--water-bg); border-color: #24435a; }
+.zone-head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.zone-head h3 { margin: 0; }
+.zone-head p { margin: 0; color: var(--muted); font-size: .88rem; }
+.zone-icon {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: .8rem;
+  flex: none;
+}
+.zone-up .zone-icon { background: var(--ember); color: #fff; }
+.zone-down .zone-icon { background: var(--water); color: #fff; }
+.zone-cards { display: flex; flex-direction: column; gap: 10px; }
+.zone-cards:empty::after {
+  content: "Nothing here yet"; color: var(--muted); font-size: .88rem; font-style: italic;
+  border: 1px dashed var(--line); border-radius: 8px; padding: 18px; text-align: center;
+}
+
+.check-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.feedback { margin-top: 14px; font-weight: 600; min-height: 1.6em; }
+.feedback.bad { color: var(--bad); }
+.feedback.good { color: var(--good); }
+.hints { display: flex; flex-direction: column; gap: 8px; }
+.hint {
+  background: var(--bg-2); border-left: 3px solid var(--gold); border-radius: 6px;
+  padding: 10px 14px; font-size: .95rem;
+}
+.hint b { color: var(--gold); margin-right: 6px; }
+
+/* ---------- solved ---------- */
+.done-stone { width: 110px; height: 110px; margin: 0 auto 16px; }
+.learn {
+  text-align: left; border: 1px solid var(--gold-2); border-radius: 10px;
+  padding: 16px 20px; margin: 6px 0 22px; background: rgba(212,169,74,.06);
+}
+.learn h3 { color: var(--gold); }
+.learn p:last-child { margin-bottom: 0; }
+
+/* stone svg */
+.stone-svg { width: 100%; height: 100%; overflow: visible; }
+.stone-svg .frag { fill: #2b2520; stroke: #47392c; stroke-width: 1.5; transition: fill .5s; }
+.stone-svg .frag.got { fill: url(#stoneFill); stroke: var(--gold); }
+.stone-svg .fleck { fill: var(--gold); opacity: 0; transition: opacity .6s; }
+.stone-svg .fleck.got { opacity: .9; }
+
+@media (max-width: 640px) {
+  .zones { grid-template-columns: 1fr; }
+  .topbar-stats { gap: 12px; }
+}
