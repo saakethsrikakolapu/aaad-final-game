@@ -36,18 +36,25 @@ Progress saves automatically. If the page closes, reopen the link and click **Co
 
 **Puzzle.** Players sort eight "memory" cards into **Upstairs (Effia)** or **The Dungeon (Esi)**:
 
-1. Is the daughter of a Big Man in an Asante village.
+1. Is the daughter of Big Man, the best warrior in an Asante village.
 2. Is married to James Collins, the British governor of Cape Coast Castle.
-3. Is packed into the dark with dozens of captive women, beneath the floors where soldiers walk.
+3. Spends her fifteenth birthday in the women's dungeon, surrounded by hundreds of captive women.
 4. Grows up believing that Baaba is her mother.
-5. Is handed a black stone by the woman who raised her, on the day she leaves home to marry.
-6. Her family once bought a girl named Abronoma to work in their home.
+5. Is handed a black stone, "a piece of your mother," once her marriage to a white man is arranged.
+6. Her mother is pushed to choose a house girl, Abronoma, from the war prisoners paraded through their village.
 7. Gives birth to a son named Quey.
-8. Leaves her mother's black stone behind when she is forced onto a ship.
+8. Is forced out of the dungeon before she can dig up her mother's stone.
 
-**Answer key.** Upstairs (Effia): 2, 4, 5, 7. Dungeon (Esi): 1, 3, 6, 8.
+**Answer key** (page numbers from *Homegoing*):
 
-The tricky cards are 5 and 8. Both sisters carry a black stone from Maame, so players have to remember that Effia receives hers from Baaba and never knew Maame was her mother, while Esi received hers from Maame directly and loses it in the dungeon.
+| Upstairs (Effia) | Dungeon (Esi) |
+|---|---|
+| 2 (pp. 14, 16) | 1 (pp. 28, 31) |
+| 4 (p. 27) | 3 (p. 28) |
+| 5 (p. 16) | 6 (p. 35) |
+| 7 (pp. 25, 50) | 8 (p. 49) |
+
+The tricky cards are 5 and 8. Both sisters have a black stone from Maame, so players have to remember that Effia receives hers from Baaba, the woman who raised her, and only later learns from Fiifi that Maame was her real mother. Esi received hers from Maame directly and loses it in the dungeon.
 
 **Hints.**
 1. Two sisters, one building. One has a home inside the castle. The other is held captive beneath it.
