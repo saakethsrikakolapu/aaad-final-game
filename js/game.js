@@ -82,6 +82,8 @@
   }
 
   // ---------- map ----------
+  const NUMBER_WORDS = ["one", "two", "three", "four"];
+
   function renderMap() {
     const map = $("#map");
     map.innerHTML = "";
@@ -91,26 +93,34 @@
       const built = !!room.screen;
       const open = prevSolved && built && !solved;
 
-      let status = "🔒 Locked";
-      if (solved) status = "✓ Solved";
+      let status = "Locked";
+      if (solved) status = "Solved";
       else if (open) status = "Enter →";
-      else if (prevSolved && !built) status = "Under construction";
+      else if (prevSolved && !built) status = "Being written";
 
-      const el = document.createElement("button");
-      el.className = "room-card " + (solved ? "solved open" : open ? "open" : "locked");
-      el.innerHTML = `<span class="num">Room ${room.id}</span>
+      const li = document.createElement("li");
+      li.className = "station " + (solved ? "solved" : open ? "open" : "locked");
+      li.innerHTML = `<span class="station-node" aria-hidden="true"></span>`;
+
+      const card = document.createElement("button");
+      card.className = "station-card";
+      card.innerHTML = `<span class="num">room ${NUMBER_WORDS[i]}</span>
         <span class="name">${room.name}</span>
         <span class="era">${room.era}</span>
         <span class="status">${status}</span>`;
-      if (open || solved) el.addEventListener("click", () => show(room.screen + (solved ? "-done" : "")));
-      else el.disabled = true;
-      map.appendChild(el);
+      if (open || solved) card.addEventListener("click", () => show(room.screen + (solved ? "-done" : "")));
+      else card.disabled = true;
+
+      li.appendChild(card);
+      map.appendChild(li);
     });
   }
 
   // ---------- timer + fragments ----------
   function updateStats() {
-    $("#fragCount").textContent = Object.keys(state.solved).length;
+    const got = Object.keys(state.solved).length;
+    $("#pips").innerHTML = [0, 1, 2, 3].map((i) => `<span class="pip ${i < got ? "got" : ""}"></span>`).join("");
+    $("#pips").setAttribute("aria-label", `${got} of 4 stone fragments recovered`);
     if (!state.startedAt) { $("#timer").textContent = "00:00"; return; }
     const s = Math.floor((Date.now() - state.startedAt) / 1000);
     const mm = String(Math.floor(s / 60)).padStart(2, "0");
@@ -139,19 +149,19 @@
         const actions = document.createElement("div");
         actions.className = "card-actions";
         actions.append(
-          makeBtn("▲ Upstairs", "to-up", () => place(card.id, "U")),
-          makeBtn("▼ Dungeon", "to-down", () => place(card.id, "D"))
+          makeBtn("Upstairs", "to-up", () => place(card.id, "U")),
+          makeBtn("Dungeon", "to-down", () => place(card.id, "D"))
         );
         el.appendChild(actions);
         pool.appendChild(el);
       } else {
-        el.appendChild(makeBtn("↩ Move back", "return", () => place(card.id, null)));
+        el.appendChild(makeBtn("Move back", "return", () => place(card.id, null)));
         (where === "U" ? up : down).appendChild(el);
       }
     });
 
     const left = R1.cards.length - Object.keys(state.r1.placement).length;
-    $("#poolCount").textContent = left ? `${left} left to sort` : "";
+    $("#poolCount").textContent = left ? `${left} left to place` : "";
     $("#checkBtn").disabled = left > 0;
     renderHints();
   }
