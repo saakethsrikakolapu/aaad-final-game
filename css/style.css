@@ -322,6 +322,23 @@ main { min-height: 100vh; }
 .chip:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
 .chip.selected { background: var(--mustard); transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
 
+/* drag and drop */
+.chip, button.slot { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.chip { touch-action: none; cursor: grab; }
+@media (pointer: fine) { button.slot.filled { cursor: grab; } }
+.is-dragging, .is-dragging * { cursor: grabbing !important; }
+.drag-ghost {
+  position: fixed; z-index: 200; pointer-events: none; margin: 0;
+  background: var(--mustard); transform: translate(-50%, -60%) rotate(-4deg);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.drag-source { opacity: .35; }
+button.slot.drop-target {
+  border-style: solid; border-color: var(--ink); background: var(--mustard) !important;
+  color: var(--ink); transform: scale(1.02);
+}
+#bank.drop-target { outline: 3px dashed var(--ink); outline-offset: 6px; background: rgba(226,167,46,.15); }
+
 .tree { border: 2px solid var(--ink); border-radius: 3px; overflow: hidden; background: #fbf5e8; }
 .tree-row { display: grid; grid-template-columns: 64px 1fr 1fr; gap: 10px; align-items: stretch; padding: 6px 12px; }
 .tree-row + .tree-row { border-top: 1px dashed rgba(29,22,18,.25); }
@@ -350,7 +367,7 @@ button.slot.ready:hover { background: rgba(226,167,46,.45); }
 button.slot.filled { border-style: solid; border-color: var(--ink); color: var(--ink); }
 button.slot.filled.fire { background: var(--fire-wash); }
 button.slot.filled.water { background: var(--water-wash); }
-button.slot.filled:hover { text-decoration: line-through; }
+button.slot.filled:hover { box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
 .slot.right { border-color: var(--good) !important; box-shadow: inset 0 0 0 1px var(--good); }
 
 /* ---------- room 3: the record ---------- */

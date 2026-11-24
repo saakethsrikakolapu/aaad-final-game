@@ -261,11 +261,13 @@
     bank.innerHTML = "";
     R2.names.filter((n) => !placed.has(n)).forEach((name) => {
       const chip = makeBtn(name, "chip" + (name === selectedName ? " selected" : ""), () => {
+        if (dragJustEnded) return;
         selectedName = selectedName === name ? null : name;
         setFeedback(2, "");
         RENDER.room2();
       });
       chip.setAttribute("aria-pressed", String(name === selectedName));
+      attachDrag(chip, name, null);
       bank.appendChild(chip);
     });
     const left = SLOT_IDS.length - Object.keys(state.r2.placement).length;
@@ -293,6 +295,7 @@
           () => tapSlot(id));
         slot.dataset.slot = id;
         slot.setAttribute("aria-label", `${line === "F" ? "Effia's" : "Esi's"} line, generation ${g}: ${name || "empty"}`);
+        if (name) attachDrag(slot, name, id);
         row.appendChild(slot);
       });
       tree.appendChild(row);
@@ -302,6 +305,7 @@
   };
 
   function tapSlot(id) {
+    if (dragJustEnded) return;
     const current = state.r2.placement[id];
     if (selectedName) {
       state.r2.placement[id] = selectedName;   // a name already here goes back to the bank
@@ -309,13 +313,116 @@
     } else if (current) {
       delete state.r2.placement[id];
     } else {
-      setFeedback(2, "Pick a name from the list first, then tap a slot.", "");
+      setFeedback(2, "Drag a name here, or tap a name first and then tap this slot.", "");
       return;
     }
     save();
     setFeedback(2, "");
     RENDER.room2();
   }
+
+  // ----- drag and drop (pointer events, so it works with a mouse and on touchscreens) -----
+  // Names drag from the bank onto a slot. Placed names can be dragged to another slot (swapping
+  // if it's taken) or back to the bank. On touchscreens only bank names drag, so a finger on the
+  // tree still scrolls the page; placed names there are moved by tapping instead.
+  let drag = null, dragJustEnded = false, scrollLoop = null;
+
+  function attachDrag(el, name, fromSlot) {
+    el.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || (fromSlot && e.pointerType === "touch")) return;
+      drag = { name, fromSlot, el, pid: e.pointerId, x0: e.clientX, y0: e.clientY,
+               x: e.clientX, y: e.clientY, active: false, ghost: null, target: null };
+    });
+  }
+
+  function startDrag() {
+    drag.active = true;
+    selectedName = null;
+    $$("#bank .chip.selected").forEach((c) => c.classList.remove("selected"));
+    drag.ghost = document.createElement("div");
+    drag.ghost.className = "chip drag-ghost";
+    drag.ghost.textContent = drag.name;
+    document.body.appendChild(drag.ghost);
+    drag.el.classList.add("drag-source");
+    document.body.classList.add("is-dragging");
+    scrollLoop = setInterval(autoScroll, 16);
+  }
+
+  function onPointerMove(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+    if (!drag.active) {
+      if (Math.hypot(drag.x - drag.x0, drag.y - drag.y0) < 6) return;   // still a tap
+      startDrag();
+    }
+    e.preventDefault();
+    drag.ghost.style.left = drag.x + "px";
+    drag.ghost.style.top = drag.y + "px";
+    updateDropTarget();
+  }
+
+  function updateDropTarget() {
+    const under = document.elementFromPoint(drag.x, drag.y);
+    const t = under && (under.closest("#tree button.slot") || under.closest("#bank"));
+    if (t === drag.target) return;
+    if (drag.target) drag.target.classList.remove("drop-target");
+    drag.target = t;
+    if (t) t.classList.add("drop-target");
+  }
+
+  // Scroll the page when dragging near the top or bottom edge (the tree can be below the fold on phones).
+  function autoScroll() {
+    if (!drag || !drag.active) return;
+    const edge = 70, top = $("#topbar").offsetHeight + edge;
+    let dy = 0;
+    if (drag.y < top) dy = -Math.ceil((top - drag.y) / 6);
+    else if (drag.y > window.innerHeight - edge) dy = Math.ceil((drag.y - (window.innerHeight - edge)) / 6);
+    if (dy) { window.scrollBy(0, dy); updateDropTarget(); }
+  }
+
+  function endDrag() {
+    if (drag.ghost) drag.ghost.remove();
+    drag.el.classList.remove("drag-source");
+    if (drag.target) drag.target.classList.remove("drop-target");
+    document.body.classList.remove("is-dragging");
+    clearInterval(scrollLoop);
+    const d = drag;
+    drag = null;
+    return d;
+  }
+
+  function onPointerUp(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    const d = endDrag();
+    if (!d.active) return;                     // it was a tap; the click handler takes over
+    dragJustEnded = true;                      // swallow the click that follows this pointerup
+    setTimeout(() => { dragJustEnded = false; }, 0);
+
+    const t = d.target;
+    if (t && t.id === "bank") {
+      if (d.fromSlot) delete state.r2.placement[d.fromSlot];
+    } else if (t && t.dataset.slot && t.dataset.slot !== d.fromSlot) {
+      const to = t.dataset.slot, displaced = state.r2.placement[to];
+      state.r2.placement[to] = d.name;
+      if (d.fromSlot) {
+        if (displaced) state.r2.placement[d.fromSlot] = displaced;   // swap the two names
+        else delete state.r2.placement[d.fromSlot];
+      }
+    } else {
+      RENDER.room2();
+      return;
+    }
+    save();
+    setFeedback(2, "");
+    RENDER.room2();
+  }
+
+  window.addEventListener("pointermove", onPointerMove, { passive: false });
+  window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointercancel", (e) => {
+    if (drag && e.pointerId === drag.pid) { endDrag(); RENDER.room2(); }
+  });
 
   async function check2() {
     if (!canHash()) return noCrypto(2);
