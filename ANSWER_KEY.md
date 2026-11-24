@@ -13,11 +13,13 @@ Puzzle answers and hints are in `js/rooms.js`. Story text and "Why this matters"
 
 Added after the professor's feedback: the rooms should get gradually harder, without getting niche.
 
+**Every answer, clue and "Why this matters" note comes only from *Homegoing*.** No outside history or course knowledge is needed.
+
 | Room | Level | What it asks of players |
 |---|---|---|
 | 1. The Castle | Warm-up | 8 major plot moments, two choices each |
 | 2. The Family Tree | Moderate | Put 12 people in order, using a story clue on each name |
-| 3. The Mines | Challenging | 5 blanks mixing the novel with course knowledge (13th Amendment, convict leasing) |
+| 3. The Mines | Challenging | 5 blanks that need closer recall of H's chapter and Marcus's research |
 | 4. Homecoming | Finale | Recall fire or water moments from across all seven generations, then type the book's last words |
 
 ---
@@ -72,13 +74,17 @@ Five dropdown blanks in H's prisoner record. The year (1880, p. 159) is now give
 
 | Blank | Answer | Source |
 |---|---|---|
+| Work before arrest | sharecropper | p. 158–159 ("his old sharecropping boss's daughter") |
 | Accused of | looking at a white woman | p. 158 ("studyin a white woman") |
 | Mines | coal | p. 159 |
-| 13th Amendment exception | crime | course concept (the "punishment for crime" clause) |
-| System | convict leasing | course concept; Marcus's research, p. 289 |
+| System | convict leasing | p. 289 (Marcus's research) |
 | Great-grandson | Marcus | p. 289 |
 
 Closing quote: "War may be over but it ain't ended." H's cellmate, p. 158.
+
+"Why this matters" sources: "once slave, once free, now slave again," Timothy and the howling dog, and Solomon's twenty years for a nickel (p. 162); Marcus's research (p. 289).
+
+Other notes: Room 1 uses the Castle tour guide in Marcus's chapter (pp. 298–299) and Baaba's argument for the marriage (p. 15). Room 2 uses Kojo's forged papers and neighbors fleeing (pp. 119, 124). The ending uses Old Lady's words to Marjorie (p. 276).
 
 ## Room 4: Homecoming
 
@@ -101,5 +107,4 @@ Closing quote: "War may be over but it ain't ended." H's cellmate, p. 158.
 ## Still to do
 
 - [ ] Each room owner reviews their room against the book
-- [ ] Add the specific lecture or reading each "Why this matters" note connects to
 - [ ] Playtest with someone outside the group and time it (target 12 to 15 minutes)

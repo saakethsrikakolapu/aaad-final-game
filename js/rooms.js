@@ -82,17 +82,18 @@ window.ROOM2 = {
 };
 
 /* ---------- Room 3: complete H's record (dropdowns) ----------
-   A step up from Room 2: four blanks come from the book, and two (f1, f4) need course knowledge. */
+   A step up from Room 2: every blank comes from H's chapter or Marcus's research, so players
+   need closer recall of the book. Everything in this game comes only from Homegoing. */
 window.ROOM3 = {
   salt: "tsos-r3|",
   fields: {
-    f1: { options: ["unpaid debt", "crime", "rebellion", "running away"],             // 13th Amendment (course)
-          hash: "2d392c349923ddbb753697b4a4fc2b8187f4f468e3135166660ad281d55c610e" },
+    f1: { options: ["blacksmith", "sharecropper", "preacher", "soldier"],             // p. 158–159
+          hash: "4976df997d3820124ac7f4ebac76153d17f3e7f619fef280b336765dd6df5b34" },
     f2: { options: ["stealing a horse", "looking at a white woman", "skipping a debt payment", "fighting a deputy"], // p. 158
           hash: "3aad3a1197af5da026643de0dabdda3a0f61b253da37bb31ca2d319e7ad2c57f" },
     f3: { options: ["gold", "iron", "coal", "salt"],                                   // p. 159
           hash: "fa6728fad574cae20278ffa368b77931df664ead5a3a849d392626d4ab4d618c" },
-    f4: { options: ["sharecropping", "convict leasing", "indentured servitude", "the Great Migration"],
+    f4: { options: ["the Underground Railroad", "convict leasing", "indentured servitude", "the draft"],   // p. 289
           hash: "6ce97b004ffd45ddb54d2c1357c5e8ef80c8aa76ea67b7bad51e6f2ec214bc46" },
     f5: { options: ["Willie", "Sonny", "Yaw", "Marcus"],                               // p. 289
           hash: "885d3787bef828f9957fd18ee7ce6160cdf2b73c806d89f800c9e23a333a62cf" }
@@ -100,7 +101,7 @@ window.ROOM3 = {
   hints: [
     "The police didn't need proof. A cellmate tells H all they had to do was say he'd been eyeing someone.",
     "Birmingham was built on what came out of the ground there. The descendant who studies H's story is a PhD student at Stanford.",
-    "The 13th Amendment ended slavery with one exception: people convicted of something could still be forced to work. States leased those prisoners out."
+    "Before his arrest, H farmed land he didn't own for a share of the crop. Marcus's research names the system that later took H from his cell to the mines."
   ]
 };
 

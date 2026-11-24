@@ -31,7 +31,7 @@ Rooms get gradually harder (professor's feedback):
 |---|---|---|
 | 1. The Castle | Warm-up | Sort 8 memories: Effia upstairs or Esi in the dungeon |
 | 2. The Family Tree | Moderate | Place 12 descendants in 7 generations, each with a story clue |
-| 3. The Mines | Challenging | Fill 5 blanks in H's prisoner record (book + course knowledge) |
+| 3. The Mines | Challenging | Fill 5 blanks in H's prisoner record |
 | 4. Homecoming | Finale | Mark 6 moments as fire or water, then type Marjorie's last words |
 
 Story text and "Why this matters" notes are in `index.html`; puzzle data and hints are in `js/rooms.js`.
