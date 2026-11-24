@@ -82,26 +82,35 @@ window.ROOM2 = {
 };
 
 /* ---------- Room 3: complete H's record (dropdowns) ----------
-   A step up from Room 2: every blank comes from H's chapter or Marcus's research, so players
-   need closer recall of the book. Everything in this game comes only from Homegoing. */
+   A step up from Room 2: six blanks from H's chapter and Marcus's research. Every wrong choice is a
+   believable trap taken from the book itself (other prisoners' charges, other family members, jobs
+   from other chapters), so players must remember H's story specifically, not just eliminate.
+   Everything in this game comes only from Homegoing. */
 window.ROOM3 = {
   salt: "tsos-r3|",
   fields: {
-    f1: { options: ["blacksmith", "sharecropper", "preacher", "soldier"],             // p. 158–159
+    // Traps: Kojo worked the docks; H only becomes a miner after his arrest.
+    f1: { options: ["dockworker", "sharecropper", "coal miner", "blacksmith"],                  // p. 158–159
           hash: "4976df997d3820124ac7f4ebac76153d17f3e7f619fef280b336765dd6df5b34" },
-    f2: { options: ["stealing a horse", "looking at a white woman", "skipping a debt payment", "fighting a deputy"], // p. 158
+    // Traps: the real charges against Solomon (a nickel) and Timothy (a disturbance), p. 162.
+    f2: { options: ["stealing a nickel", "causing a disturbance", "looking at a white woman", "breaking his work contract"], // p. 158
           hash: "3aad3a1197af5da026643de0dabdda3a0f61b253da37bb31ca2d319e7ad2c57f" },
-    f3: { options: ["gold", "iron", "coal", "salt"],                                   // p. 159
+    // Trap: Birmingham is also known for iron.
+    f3: { options: ["iron", "coal", "copper", "gold"],                                         // p. 159
           hash: "fa6728fad574cae20278ffa368b77931df664ead5a3a849d392626d4ab4d618c" },
     f4: { options: ["the Underground Railroad", "convict leasing", "indentured servitude", "the draft"],   // p. 289
           hash: "6ce97b004ffd45ddb54d2c1357c5e8ef80c8aa76ea67b7bad51e6f2ec214bc46" },
-    f5: { options: ["Willie", "Sonny", "Yaw", "Marcus"],                               // p. 289
-          hash: "885d3787bef828f9957fd18ee7ce6160cdf2b73c806d89f800c9e23a333a62cf" }
+    // Traps: Sonny is H's grandson (not great-grandson); Kojo is H's father; Yaw is from Effia's line.
+    f5: { options: ["Sonny", "Kojo", "Marcus", "Yaw"],                                          // p. 289
+          hash: "885d3787bef828f9957fd18ee7ce6160cdf2b73c806d89f800c9e23a333a62cf" },
+    // Traps: Anna is H's mother; Willie is his daughter (born later); Cora Hobbs is the woman he's accused over.
+    f6: { options: ["Anna", "Cora", "Willie", "Ethe"],                                          // p. 159, 162
+          hash: "bb5c07633d0b72aaab42a42268aa8c2a7c4019707674af5a099a26196e12e07a" }
   },
   hints: [
-    "The police didn't need proof. A cellmate tells H all they had to do was say he'd been eyeing someone.",
-    "Birmingham was built on what came out of the ground there. The descendant who studies H's story is a PhD student at Stanford.",
-    "Before his arrest, H farmed land he didn't own for a share of the crop. Marcus's research names the system that later took H from his cell to the mines."
+    "The police didn't need proof. A cellmate tells H all they had to do was say he'd been eyeing someone. The other charges belong to other prisoners on his chain.",
+    "Before his arrest, H farmed someone else's land for a share of the crop. He only goes underground after the state sells him.",
+    "In the mines, H holds on to memories of the woman he loved before his arrest, not his mother or his daughter. And the great-grandson who studies all this is at Stanford."
   ]
 };
 

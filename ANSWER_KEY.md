@@ -19,7 +19,7 @@ Added after the professor's feedback: the rooms should get gradually harder, wit
 |---|---|---|
 | 1. The Castle | Warm-up | 8 major plot moments, two choices each |
 | 2. The Family Tree | Moderate | Put 12 people in order, using a story clue on each name |
-| 3. The Mines | Challenging | 5 blanks that need closer recall of H's chapter and Marcus's research |
+| 3. The Mines | Challenging | 6 blanks from H's chapter, where every wrong choice is a trap from the book |
 | 4. Homecoming | Finale | Recall fire or water moments from across all seven generations, then type the book's last words |
 
 ---
@@ -70,15 +70,17 @@ Source for the tree: the family tree printed before chapter one, and the chapter
 
 ## Room 3: The Mines
 
-Five dropdown blanks in H's prisoner record. The year (1880, p. 159) is now given in the text, not asked.
+Six dropdown blanks in H's prisoner record. The year (1880, p. 159) is given in the text, not asked.
+Every wrong choice is a trap taken from the book, so players have to remember H's story specifically.
 
-| Blank | Answer | Source |
-|---|---|---|
-| Work before arrest | sharecropper | p. 158–159 ("his old sharecropping boss's daughter") |
-| Accused of | looking at a white woman | p. 158 ("studyin a white woman") |
-| Mines | coal | p. 159 |
-| System | convict leasing | p. 289 (Marcus's research) |
-| Great-grandson | Marcus | p. 289 |
+| Blank | Answer | Traps (wrong choices) | Source |
+|---|---|---|---|
+| Work before arrest | sharecropper | dockworker (Kojo's job), coal miner (only after his arrest), blacksmith | p. 158–159 ("his old sharecropping boss's daughter") |
+| Accused of | looking at a white woman | stealing a nickel (Solomon's charge), causing a disturbance (Timothy's charge), breaking his work contract | p. 158 ("studyin a white woman"); traps p. 162 |
+| Mines | coal | iron, copper, gold | p. 159 |
+| Person he thinks about | Ethe | Anna (his mother), Cora (his accuser), Willie (his future daughter) | p. 159, 162 |
+| System | convict leasing | the Underground Railroad, indentured servitude, the draft | p. 289 (Marcus's research) |
+| Great-grandson | Marcus | Sonny (grandson), Kojo (father), Yaw (Effia's line) | p. 289 |
 
 Closing quote: "War may be over but it ain't ended." H's cellmate, p. 158.
 
