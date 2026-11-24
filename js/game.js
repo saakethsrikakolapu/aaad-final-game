@@ -13,7 +13,7 @@
     r1: { placement: {}, hintsUsed: 0 },
     r2: { placement: {}, hintsUsed: 0 },
     r3: { answers: {}, hintsUsed: 0 },
-    r4: { fears: {}, fearsOk: false, hintsUsed: 0 }
+    r4: { moments: {}, momentsOk: false, hintsUsed: 0 }
   });
   let state = load();
 
@@ -120,7 +120,9 @@
 
       const card = document.createElement("button");
       card.className = "station-card";
-      card.innerHTML = `<span class="num">room ${NUMBER_WORDS[i]}</span>
+      const pips = [0, 1, 2, 3].map((p) => `<i class="${p <= i ? "on" : ""}"></i>`).join("");
+      card.innerHTML = `<span class="num">room ${NUMBER_WORDS[i]}
+          <span class="level-tag" aria-label="Difficulty ${i + 1} of 4: ${room.level}">${pips}${room.level}</span></span>
         <span class="name">${room.name}</span>
         <span class="era">${room.era}</span>
         <span class="status">${solved ? "Solved" : open ? "Enter →" : "Locked"}</span>`;
@@ -250,6 +252,7 @@
   // ---------- Room 2: rebuild the family tree ----------
   const R2 = window.ROOM2;
   const SLOT_IDS = Object.keys(R2.slots);
+  const CLUES = Object.fromEntries(R2.names.map((n) => [n.name, n.clue]));
   let selectedName = null;
 
   RENDER.room2 = function renderRoom2() {
@@ -259,13 +262,17 @@
     // name bank
     const bank = $("#bank");
     bank.innerHTML = "";
-    R2.names.filter((n) => !placed.has(n)).forEach((name) => {
-      const chip = makeBtn(name, "chip" + (name === selectedName ? " selected" : ""), () => {
+    R2.names.filter((n) => !placed.has(n.name)).forEach(({ name, clue }) => {
+      const chip = makeBtn("", "chip clued" + (name === selectedName ? " selected" : ""), () => {
         if (dragJustEnded) return;
         selectedName = selectedName === name ? null : name;
         setFeedback(2, "");
         RENDER.room2();
       });
+      chip.dataset.name = name;
+      chip.innerHTML = `<span class="chip-name"></span><span class="chip-clue"></span>`;
+      chip.querySelector(".chip-name").textContent = name;
+      chip.querySelector(".chip-clue").textContent = clue;
       chip.setAttribute("aria-pressed", String(name === selectedName));
       attachDrag(chip, name, null);
       bank.appendChild(chip);
@@ -295,7 +302,12 @@
           () => tapSlot(id));
         slot.dataset.slot = id;
         slot.setAttribute("aria-label", `${line === "F" ? "Effia's" : "Esi's"} line, generation ${g}: ${name || "empty"}`);
-        if (name) attachDrag(slot, name, id);
+        if (name) {
+          slot.innerHTML = `<span class="slot-name"></span><span class="slot-clue"></span>`;
+          slot.querySelector(".slot-name").textContent = name;
+          slot.querySelector(".slot-clue").textContent = CLUES[name] || "";
+          attachDrag(slot, name, id);
+        }
         row.appendChild(slot);
       });
       tree.appendChild(row);
@@ -484,35 +496,66 @@
   // ---------- Room 4: fears, then the last words ----------
   const R4 = window.ROOM4;
 
+  function buildRoom4() {
+    const wrap = $("#moments");
+    wrap.innerHTML = "";
+    R4.moments.forEach((m) => {
+      const row = document.createElement("div");
+      row.className = "fear-row moment-row";
+      row.dataset.id = m.id;
+      const text = document.createElement("p");
+      text.className = "moment-text";
+      text.textContent = m.text;
+      const toggle = document.createElement("div");
+      toggle.className = "toggle";
+      toggle.setAttribute("role", "group");
+      toggle.setAttribute("aria-label", "Fire or water");
+      [["fire", "Fire", "tog-fire"], ["water", "Water", "tog-water"]].forEach(([val, label, cls]) => {
+        toggle.appendChild(makeBtn(label, cls, () => {
+          state.r4.moments[m.id] = val;
+          save();
+          setFeedback(4, "");
+          RENDER.room4();
+        }));
+        toggle.lastChild.dataset.val = val;
+      });
+      row.append(text, toggle);
+      wrap.appendChild(row);
+    });
+  }
+
   RENDER.room4 = function renderRoom4() {
-    $$("#step1 .fear-row").forEach((row) => {
-      const chosen = state.r4.fears[row.dataset.person];
+    const done = state.r4.momentsOk;
+    $$("#moments .moment-row").forEach((row) => {
+      const chosen = state.r4.moments[row.dataset.id];
       row.querySelectorAll("button").forEach((b) => {
         const on = b.dataset.val === chosen;
         b.classList.toggle("on", on);
         b.setAttribute("aria-pressed", String(on));
-        b.disabled = state.r4.fearsOk;
+        b.disabled = done;
       });
     });
-    $("#step1").classList.toggle("done", state.r4.fearsOk);
-    $("#checkFears").hidden = state.r4.fearsOk;
-    $("#checkFears").disabled = !(state.r4.fears.marjorie && state.r4.fears.marcus);
-    $("#step2").hidden = !state.r4.fearsOk;
+    $("#step1").classList.toggle("done", done);
+    $("#checkFears").hidden = done;
+    $("#checkFears").disabled = R4.moments.some((m) => !state.r4.moments[m.id]);
+    $("#step2").hidden = !done;
     renderHints(4);
   };
 
   async function checkFears() {
     if (!canHash()) return noCrypto(4);
-    const ok = await Promise.all(["marjorie", "marcus"].map(async (p) =>
-      (await sha256(R4.salt + p + "|" + state.r4.fears[p])) === R4.fears[p]));
-    if (ok.every(Boolean)) {
-      state.r4.fearsOk = true;
+    const results = await Promise.all(R4.moments.map(async (m) =>
+      (await sha256(R4.salt + m.id + "|" + state.r4.moments[m.id])) === m.hash));
+    const right = results.filter(Boolean).length;
+    if (right === R4.moments.length) {
+      state.r4.momentsOk = true;
       save();
-      setFeedback(4, "Right. Each of them fears the element of their own bloodline.", "good");
+      setFeedback(4, "Right. Fire follows Effia's family, and water follows Esi's. One last step.", "good");
       RENDER.room4();
-      $("#wordsInput").focus();
+      $("#step2").scrollIntoView({ behavior: "smooth", block: "center" });
+      $("#wordsInput").focus({ preventScroll: true });
     } else {
-      setFeedback(4, "Not quite. Think about how each family line began.", "bad");
+      setFeedback(4, `${right} of ${R4.moments.length} moments are marked correctly. Think about whose bloodline each person belongs to.`, "bad");
     }
   }
 
@@ -540,6 +583,7 @@
   function init() {
     injectDefs();
     buildRoom3();
+    buildRoom4();
 
     $$("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
     $$("[data-next]").forEach((b) => b.addEventListener("click", () => show("room" + b.dataset.next)));
@@ -551,14 +595,6 @@
     $("#check3").addEventListener("click", check3);
     $("#checkFears").addEventListener("click", checkFears);
     $("#wordsForm").addEventListener("submit", checkWords);
-
-    $$("#step1 .fear-row").forEach((row) => row.querySelectorAll("button").forEach((b) =>
-      b.addEventListener("click", () => {
-        state.r4.fears[row.dataset.person] = b.dataset.val;
-        save();
-        setFeedback(4, "");
-        RENDER.room4();
-      })));
 
     [1, 2, 3, 4].forEach((n) => $("#hint" + n).addEventListener("click", () => {
       const r = state["r" + n];
