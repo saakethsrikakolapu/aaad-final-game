@@ -3,15 +3,29 @@
 
   const STORE_KEY = "tsos-progress-v1";
   const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // ---------- saved state (localStorage is optional; game works without it) ----------
-  const fresh = () => ({ startedAt: null, solved: {}, r1: { placement: {}, hintsUsed: 0 } });
+  // ---------- saved state (localStorage is optional; the game works without it) ----------
+  const fresh = () => ({
+    startedAt: null,
+    finishedAt: null,
+    solved: {},
+    r1: { placement: {}, hintsUsed: 0 },
+    r2: { placement: {}, hintsUsed: 0 },
+    r3: { answers: {}, hintsUsed: 0 },
+    r4: { fears: {}, fearsOk: false, hintsUsed: 0 }
+  });
   let state = load();
 
   function load() {
     try {
       const raw = localStorage.getItem(STORE_KEY);
-      if (raw) return Object.assign(fresh(), JSON.parse(raw));
+      if (raw) {
+        const saved = JSON.parse(raw);
+        const base = fresh();
+        for (const k of ["r1", "r2", "r3", "r4"]) saved[k] = Object.assign(base[k], saved[k]);
+        return Object.assign(base, saved);
+      }
     } catch (e) { /* private mode or blocked storage */ }
     return fresh();
   }
@@ -24,6 +38,7 @@
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
     return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
   }
+  const canHash = () => !!(window.crypto && crypto.subtle);
 
   // ---------- stone graphic (4 fragments) ----------
   const FRAGS = [
@@ -33,11 +48,11 @@
     "M50,52 L52,94 L20,84 L7,52 Z"
   ];
   const FLECKS = [[28, 34], [70, 28], [72, 66], [32, 72]];
+  const solvedCount = () => Object.keys(state.solved).length;
 
   function stoneSVG() {
-    const got = Object.keys(state.solved).length;
-    const frags = FRAGS.map((d, i) =>
-      `<path class="frag ${i < got ? "got" : ""}" d="${d}"/>`).join("");
+    const got = solvedCount();
+    const frags = FRAGS.map((d, i) => `<path class="frag ${i < got ? "got" : ""}" d="${d}"/>`).join("");
     const flecks = FLECKS.map(([x, y], i) =>
       `<circle class="fleck ${i < got ? "got" : ""}" cx="${x}" cy="${y}" r="2.2"/>`).join("");
     return `<svg class="stone-svg" viewBox="0 0 100 100" role="img" aria-label="${got} of 4 stone fragments">${frags}${flecks}</svg>`;
@@ -56,14 +71,20 @@
   }
 
   // ---------- screens ----------
-  const SCREENS = ["title", "howto", "map", "room1", "room1-done"];
+  const SCREENS = ["title", "howto", "map", "room1", "room1-done", "room2", "room2-done",
+                   "room3", "room3-done", "room4", "end"];
+  const RENDER = {};
+
   function show(name) {
     SCREENS.forEach((s) => { $("#screen-" + s).hidden = s !== name; });
     $("#topbar").hidden = name === "title" || name === "howto";
     if (name === "title") renderTitle();
     if (name === "map") renderMap();
-    if (name === "room1") renderRoom1();
-    if (name === "room1-done") $("#doneStone").innerHTML = stoneSVG();
+    if (RENDER[name]) RENDER[name]();
+    if (name.endsWith("-done") || name === "end") {
+      $$("#screen-" + name + " .done-stone").forEach((el) => { el.innerHTML = stoneSVG(); });
+    }
+    if (name === "end") renderEnd();
     updateStats();
     window.scrollTo(0, 0);
   }
@@ -78,7 +99,8 @@
 
   function start() {
     if (!state.startedAt) { state.startedAt = Date.now(); save(); }
-    show(state.solved[1] ? "map" : "room1");
+    const next = window.ROOMS.find((r) => !state.solved[r.id]);
+    show(next ? next.screen : "end");
   }
 
   // ---------- map ----------
@@ -90,13 +112,7 @@
     window.ROOMS.forEach((room, i) => {
       const solved = !!state.solved[room.id];
       const prevSolved = i === 0 || !!state.solved[window.ROOMS[i - 1].id];
-      const built = !!room.screen;
-      const open = prevSolved && built && !solved;
-
-      let status = "Locked";
-      if (solved) status = "Solved";
-      else if (open) status = "Enter →";
-      else if (prevSolved && !built) status = "Being written";
+      const open = prevSolved && !solved;
 
       const li = document.createElement("li");
       li.className = "station " + (solved ? "solved" : open ? "open" : "locked");
@@ -107,31 +123,74 @@
       card.innerHTML = `<span class="num">room ${NUMBER_WORDS[i]}</span>
         <span class="name">${room.name}</span>
         <span class="era">${room.era}</span>
-        <span class="status">${status}</span>`;
-      if (open || solved) card.addEventListener("click", () => show(room.screen + (solved ? "-done" : "")));
-      else card.disabled = true;
-
+        <span class="status">${solved ? "Solved" : open ? "Enter →" : "Locked"}</span>`;
+      if (open || solved) {
+        const target = solved ? (room.id === 4 ? "end" : room.screen + "-done") : room.screen;
+        card.addEventListener("click", () => show(target));
+      } else {
+        card.disabled = true;
+      }
       li.appendChild(card);
       map.appendChild(li);
     });
   }
 
   // ---------- timer + fragments ----------
+  function elapsedSeconds() {
+    if (!state.startedAt) return 0;
+    return Math.floor(((state.finishedAt || Date.now()) - state.startedAt) / 1000);
+  }
+  function fmt(s) {
+    return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  }
   function updateStats() {
-    const got = Object.keys(state.solved).length;
+    const got = solvedCount();
     $("#pips").innerHTML = [0, 1, 2, 3].map((i) => `<span class="pip ${i < got ? "got" : ""}"></span>`).join("");
     $("#pips").setAttribute("aria-label", `${got} of 4 stone fragments recovered`);
-    if (!state.startedAt) { $("#timer").textContent = "00:00"; return; }
-    const s = Math.floor((Date.now() - state.startedAt) / 1000);
-    const mm = String(Math.floor(s / 60)).padStart(2, "0");
-    const ss = String(s % 60).padStart(2, "0");
-    $("#timer").textContent = `${mm}:${ss}`;
+    $("#timer").textContent = fmt(elapsedSeconds());
   }
 
-  // ---------- room 1: sort the memories ----------
+  // ---------- shared room helpers ----------
+  function setFeedback(n, msg, kind) {
+    const f = $("#feedback" + n);
+    f.textContent = msg;
+    f.className = "feedback " + (kind || "");
+  }
+
+  function renderHints(n) {
+    const data = window["ROOM" + n], used = state["r" + n].hintsUsed;
+    $("#hints" + n).innerHTML = data.hints.slice(0, used)
+      .map((h, i) => `<div class="hint"><b>Hint ${i + 1}</b>${h}</div>`).join("");
+    const left = data.hints.length - used;
+    $("#hint" + n).textContent = left ? `Hint (${left} left)` : "No hints left";
+    $("#hint" + n).disabled = left === 0;
+  }
+
+  function solveRoom(n) {
+    state.solved[n] = true;
+    if (n === 4) state.finishedAt = Date.now();
+    save();
+    updateStats();
+    setTimeout(() => show(n === 4 ? "end" : `room${n}-done`), 1100);
+  }
+
+  function makeBtn(label, cls, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function noCrypto(n) {
+    setFeedback(n, "This browser can't check answers here. Open the game over https.", "bad");
+  }
+
+  // ---------- Room 1: sort the memories ----------
   const R1 = window.ROOM1;
 
-  function renderRoom1() {
+  RENDER.room1 = function renderRoom1() {
     const pool = $("#pool"), up = $("#zone-U"), down = $("#zone-D");
     pool.innerHTML = up.innerHTML = down.innerHTML = "";
 
@@ -149,96 +208,266 @@
         const actions = document.createElement("div");
         actions.className = "card-actions";
         actions.append(
-          makeBtn("Upstairs", "to-up", () => place(card.id, "U")),
-          makeBtn("Dungeon", "to-down", () => place(card.id, "D"))
+          makeBtn("Upstairs", "to-up", () => place1(card.id, "U")),
+          makeBtn("Dungeon", "to-down", () => place1(card.id, "D"))
         );
         el.appendChild(actions);
         pool.appendChild(el);
       } else {
-        el.appendChild(makeBtn("Move back", "return", () => place(card.id, null)));
+        el.appendChild(makeBtn("Move back", "return", () => place1(card.id, null)));
         (where === "U" ? up : down).appendChild(el);
       }
     });
 
     const left = R1.cards.length - Object.keys(state.r1.placement).length;
     $("#poolCount").textContent = left ? `${left} left to place` : "";
-    $("#checkBtn").disabled = left > 0;
-    renderHints();
-  }
+    $("#check1").disabled = left > 0;
+    renderHints(1);
+  };
 
-  function makeBtn(label, cls, onClick) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = cls;
-    b.textContent = label;
-    b.addEventListener("click", onClick);
-    return b;
-  }
-
-  function place(id, zone) {
+  function place1(id, zone) {
     if (zone) state.r1.placement[id] = zone;
     else delete state.r1.placement[id];
     save();
-    setFeedback("", "");
-    renderRoom1();
+    setFeedback(1, "");
+    RENDER.room1();
   }
 
-  async function checkRoom1() {
-    if (!window.crypto || !crypto.subtle) {
-      setFeedback("This browser can't check answers here. Open the game over https.", "bad");
+  async function check1() {
+    if (!canHash()) return noCrypto(1);
+    const results = await Promise.all(R1.cards.map(async (c) =>
+      (await sha256(R1.salt + c.id + "|" + state.r1.placement[c.id])) === c.hash));
+    const right = results.filter(Boolean).length;
+    if (right === R1.cards.length) {
+      $$("#screen-room1 .zone .card").forEach((el) => el.classList.add("right"));
+      setFeedback(1, "Every memory is where it belongs.", "good");
+      solveRoom(1);
+    } else {
+      setFeedback(1, `${right} of ${R1.cards.length} memories are in the right place. Talk it through and try again.`, "bad");
+    }
+  }
+
+  // ---------- Room 2: rebuild the family tree ----------
+  const R2 = window.ROOM2;
+  const SLOT_IDS = Object.keys(R2.slots);
+  let selectedName = null;
+
+  RENDER.room2 = function renderRoom2() {
+    const placed = new Set(Object.values(state.r2.placement));
+    if (selectedName && placed.has(selectedName)) selectedName = null;
+
+    // name bank
+    const bank = $("#bank");
+    bank.innerHTML = "";
+    R2.names.filter((n) => !placed.has(n)).forEach((name) => {
+      const chip = makeBtn(name, "chip" + (name === selectedName ? " selected" : ""), () => {
+        selectedName = selectedName === name ? null : name;
+        setFeedback(2, "");
+        RENDER.room2();
+      });
+      chip.setAttribute("aria-pressed", String(name === selectedName));
+      bank.appendChild(chip);
+    });
+    const left = SLOT_IDS.length - Object.keys(state.r2.placement).length;
+    $("#bankCount").textContent = left ? `${left} slots left` : "";
+
+    // tree rows
+    const tree = $("#tree");
+    tree.innerHTML = "";
+    for (let g = 1; g <= 7; g++) {
+      const row = document.createElement("div");
+      row.className = "tree-row";
+      row.innerHTML = `<span class="gen-label"><span class="gen-word">Gen</span> ${g}</span>`;
+      ["F", "W"].forEach((line) => {
+        if (g === 1) {
+          const fixed = document.createElement("div");
+          fixed.className = `slot fixed ${line === "F" ? "fire" : "water"}`;
+          fixed.textContent = line === "F" ? "Effia" : "Esi";
+          row.appendChild(fixed);
+          return;
+        }
+        const id = line + g;
+        const name = state.r2.placement[id];
+        const slot = makeBtn(name || (selectedName ? "Place here" : "Empty"),
+          `slot ${line === "F" ? "fire" : "water"} ${name ? "filled" : "empty"} ${selectedName && !name ? "ready" : ""}`,
+          () => tapSlot(id));
+        slot.dataset.slot = id;
+        slot.setAttribute("aria-label", `${line === "F" ? "Effia's" : "Esi's"} line, generation ${g}: ${name || "empty"}`);
+        row.appendChild(slot);
+      });
+      tree.appendChild(row);
+    }
+    $("#check2").disabled = left > 0;
+    renderHints(2);
+  };
+
+  function tapSlot(id) {
+    const current = state.r2.placement[id];
+    if (selectedName) {
+      state.r2.placement[id] = selectedName;   // a name already here goes back to the bank
+      selectedName = null;
+    } else if (current) {
+      delete state.r2.placement[id];
+    } else {
+      setFeedback(2, "Pick a name from the list first, then tap a slot.", "");
       return;
     }
-    const results = await Promise.all(R1.cards.map(async (c) => {
-      const zone = state.r1.placement[c.id];
-      return (await sha256(R1.salt + c.id + "|" + zone)) === c.hash;
-    }));
-    const right = results.filter(Boolean).length;
+    save();
+    setFeedback(2, "");
+    RENDER.room2();
+  }
 
-    if (right === R1.cards.length) {
-      document.querySelectorAll("#screen-room1 .zone .card").forEach((el) => el.classList.add("right"));
-      setFeedback("Every memory is where it belongs.", "good");
-      state.solved[1] = true;
-      save();
-      updateStats();
-      setTimeout(() => show("room1-done"), 1100);
+  async function check2() {
+    if (!canHash()) return noCrypto(2);
+    const results = await Promise.all(SLOT_IDS.map(async (id) =>
+      (await sha256(R2.salt + id + "|" + state.r2.placement[id])) === R2.slots[id]));
+    const right = results.filter(Boolean).length;
+    if (right === SLOT_IDS.length) {
+      $$("#tree .slot.filled").forEach((el) => el.classList.add("right"));
+      setFeedback(2, "Both bloodlines are whole again.", "good");
+      solveRoom(2);
     } else {
-      setFeedback(`${right} of ${R1.cards.length} memories are in the right place. Talk it through and try again.`, "bad");
+      setFeedback(2, `${right} of ${SLOT_IDS.length} names are in the right place. Talk it through and try again.`, "bad");
     }
   }
 
-  function setFeedback(msg, kind) {
-    const f = $("#feedback");
-    f.textContent = msg;
-    f.className = "feedback " + kind;
+  // ---------- Room 3: complete H's record ----------
+  const R3 = window.ROOM3;
+  const FIELD_IDS = Object.keys(R3.fields);
+
+  function buildRoom3() {
+    $$("#screen-room3 select[data-field]").forEach((sel) => {
+      const f = R3.fields[sel.dataset.field];
+      sel.innerHTML = `<option value="">choose…</option>` +
+        f.options.map((o) => `<option value="${o}">${o}</option>`).join("");
+      sel.addEventListener("change", () => {
+        if (sel.value) state.r3.answers[sel.dataset.field] = sel.value;
+        else delete state.r3.answers[sel.dataset.field];
+        save();
+        setFeedback(3, "");
+        RENDER.room3();
+      });
+    });
   }
 
-  function renderHints() {
-    const used = state.r1.hintsUsed;
-    $("#hints").innerHTML = R1.hints.slice(0, used)
-      .map((h, i) => `<div class="hint"><b>Hint ${i + 1}</b>${h}</div>`).join("");
-    const left = R1.hints.length - used;
-    $("#hintBtn").textContent = left ? `Hint (${left} left)` : "No hints left";
-    $("#hintBtn").disabled = left === 0;
+  RENDER.room3 = function renderRoom3() {
+    $$("#screen-room3 select[data-field]").forEach((sel) => {
+      sel.value = state.r3.answers[sel.dataset.field] || "";
+      sel.classList.toggle("filled", !!sel.value);
+      sel.classList.remove("right");
+    });
+    $("#check3").disabled = FIELD_IDS.some((id) => !state.r3.answers[id]);
+    renderHints(3);
+  };
+
+  async function check3() {
+    if (!canHash()) return noCrypto(3);
+    const results = await Promise.all(FIELD_IDS.map(async (id) =>
+      (await sha256(R3.salt + id + "|" + state.r3.answers[id])) === R3.fields[id].hash));
+    const right = results.filter(Boolean).length;
+    if (right === FIELD_IDS.length) {
+      $$("#screen-room3 select").forEach((el) => el.classList.add("right"));
+      setFeedback(3, "H's record is complete.", "good");
+      solveRoom(3);
+    } else {
+      setFeedback(3, `${right} of ${FIELD_IDS.length} blanks are correct. Talk it through and try again.`, "bad");
+    }
+  }
+
+  // ---------- Room 4: fears, then the last words ----------
+  const R4 = window.ROOM4;
+
+  RENDER.room4 = function renderRoom4() {
+    $$("#step1 .fear-row").forEach((row) => {
+      const chosen = state.r4.fears[row.dataset.person];
+      row.querySelectorAll("button").forEach((b) => {
+        const on = b.dataset.val === chosen;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+        b.disabled = state.r4.fearsOk;
+      });
+    });
+    $("#step1").classList.toggle("done", state.r4.fearsOk);
+    $("#checkFears").hidden = state.r4.fearsOk;
+    $("#checkFears").disabled = !(state.r4.fears.marjorie && state.r4.fears.marcus);
+    $("#step2").hidden = !state.r4.fearsOk;
+    renderHints(4);
+  };
+
+  async function checkFears() {
+    if (!canHash()) return noCrypto(4);
+    const ok = await Promise.all(["marjorie", "marcus"].map(async (p) =>
+      (await sha256(R4.salt + p + "|" + state.r4.fears[p])) === R4.fears[p]));
+    if (ok.every(Boolean)) {
+      state.r4.fearsOk = true;
+      save();
+      setFeedback(4, "Right. Each of them fears the element of their own bloodline.", "good");
+      RENDER.room4();
+      $("#wordsInput").focus();
+    } else {
+      setFeedback(4, "Not quite. Think about how each family line began.", "bad");
+    }
+  }
+
+  async function checkWords(e) {
+    e.preventDefault();
+    if (!canHash()) return noCrypto(4);
+    const typed = $("#wordsInput").value.toUpperCase().replace(/[^A-Z]/g, "");
+    if (!typed) return;
+    if ((await sha256(R4.salt + "words|" + typed)) === R4.words) {
+      setFeedback(4, "The stone is whole.", "good");
+      solveRoom(4);
+    } else {
+      setFeedback(4, "That's not what she says. Think about this game's slogan.", "bad");
+    }
+  }
+
+  // ---------- ending ----------
+  function renderEnd() {
+    $("#endTime").textContent = fmt(elapsedSeconds());
+    const hints = [1, 2, 3, 4].reduce((sum, n) => sum + state["r" + n].hintsUsed, 0);
+    $("#endHints").textContent = `${hints} of 12`;
   }
 
   // ---------- wiring ----------
   function init() {
     injectDefs();
-    document.querySelectorAll("[data-go]").forEach((b) =>
-      b.addEventListener("click", () => show(b.dataset.go)));
+    buildRoom3();
+
+    $$("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
+    $$("[data-next]").forEach((b) => b.addEventListener("click", () => show("room" + b.dataset.next)));
     $("#startBtn").addEventListener("click", start);
     $("#startBtn2").addEventListener("click", start);
-    $("#checkBtn").addEventListener("click", checkRoom1);
-    $("#hintBtn").addEventListener("click", () => {
-      if (state.r1.hintsUsed < R1.hints.length) { state.r1.hintsUsed++; save(); renderHints(); }
-    });
-    document.querySelectorAll(".js-restart").forEach((b) => b.addEventListener("click", () => {
+
+    $("#check1").addEventListener("click", check1);
+    $("#check2").addEventListener("click", check2);
+    $("#check3").addEventListener("click", check3);
+    $("#checkFears").addEventListener("click", checkFears);
+    $("#wordsForm").addEventListener("submit", checkWords);
+
+    $$("#step1 .fear-row").forEach((row) => row.querySelectorAll("button").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.r4.fears[row.dataset.person] = b.dataset.val;
+        save();
+        setFeedback(4, "");
+        RENDER.room4();
+      })));
+
+    [1, 2, 3, 4].forEach((n) => $("#hint" + n).addEventListener("click", () => {
+      const r = state["r" + n];
+      if (r.hintsUsed < window["ROOM" + n].hints.length) { r.hintsUsed++; save(); renderHints(n); }
+    }));
+
+    $$(".js-restart").forEach((b) => b.addEventListener("click", () => {
       if (!confirm("Restart the game? This erases all progress and resets the timer.")) return;
       state = fresh();
+      selectedName = null;
       save();
-      setFeedback("", "");
+      [1, 2, 3, 4].forEach((n) => setFeedback(n, ""));
+      $("#wordsInput").value = "";
       show("title");
     }));
+
     setInterval(updateStats, 1000);
     show("title");
   }

@@ -22,12 +22,17 @@ Then open http://localhost:5173.
 
 ## Status
 
-| Room | Status |
+All four rooms and the ending screen are playable. See `ANSWER_KEY.md` for answers, page
+citations and the team review checklist.
+
+| Room | Puzzle |
 |---|---|
-| 1. The Castle | Playable |
-| 2. The Family Tree | Not built |
-| 3. The Mines | Not built |
-| 4. Homecoming | Not built |
+| 1. The Castle | Sort 8 memories: Effia upstairs or Esi in the dungeon |
+| 2. The Family Tree | Place 12 descendants in 7 generations (2 decoy names) |
+| 3. The Mines | Fill 5 blanks in H's prisoner record |
+| 4. Homecoming | Match the fears, then type Marjorie's last words |
+
+Story text and "Why this matters" notes are in `index.html`; puzzle data and hints are in `js/rooms.js`.
 
 ## Deploy (Vercel)
 
